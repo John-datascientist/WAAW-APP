@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, Alert } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Alert } from 'react-native';
 import {
   useFonts,
   Newsreader_500Medium,
@@ -18,10 +18,10 @@ import {
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
 
-import { colors } from './src/theme';
+import { colors, fonts, spacing } from './src/theme';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { useStartups, useWatchlist as useRealWatchlist, useNotifications as useRealNotifications } from './src/hooks/useWAAW';
-import { supabase } from './src/lib/supabase';
+import { supabase, isSupabaseConfigured } from './src/lib/supabase';
 import TabBar, { Tab } from './src/navigation/TabBar';
 import AgeGateScreen from './src/screens/AgeGateScreen';
 import CookieConsentScreen from './src/screens/CookieConsentScreen';
@@ -123,6 +123,18 @@ type AppScreen =
   | { type: 'legal-doc'; doc: string };
 
 export default function App() {
+  if (!isSupabaseConfigured) {
+    return (
+      <View style={styles.configError}>
+        <Text style={styles.configErrorTitle}>Configuration error</Text>
+        <Text style={styles.configErrorBody}>
+          EXPO_PUBLIC_SUPABASE_URL and/or EXPO_PUBLIC_SUPABASE_ANON_KEY are missing at build time.
+          Check that both are set for the Production environment in your hosting provider's
+          environment variables, then trigger a fresh deploy (not a cached one).
+        </Text>
+      </View>
+    );
+  }
   return (
     <AuthProvider>
       <AppInner />
@@ -1311,4 +1323,25 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   loading: { flex: 1, backgroundColor: colors.bg },
   screenWrap: { flex: 1 },
+  configError: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  configErrorTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 22,
+    color: colors.danger,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  configErrorBody: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    color: colors.muted,
+    lineHeight: 20,
+    textAlign: 'center',
+    fontWeight: '300' as any,
+  },
 });

@@ -4,17 +4,28 @@ import { createClient } from '@supabase/supabase-js';
 
 // ─── Replace these with your actual Supabase project values ──────────────────
 // Found at: supabase.com → your project → Settings → API
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// createClient throws synchronously if the URL is missing, which would
+// otherwise crash the whole app into a blank white screen with nothing but a
+// console error — e.g. if an env var is misconfigured or scoped wrong on the
+// hosting platform. Falling back to a harmless placeholder lets the app boot
+// so App.tsx can show a clear, in-app configuration error instead.
+export const isSupabaseConfigured = !!SUPABASE_URL && !!SUPABASE_ANON_KEY;
+
+export const supabase = createClient(
+  SUPABASE_URL || 'https://placeholder.supabase.co',
+  SUPABASE_ANON_KEY || 'placeholder-anon-key',
+  {
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  }
+);
 
 export type Database = {
   public: {
