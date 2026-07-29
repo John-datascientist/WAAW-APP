@@ -1,0 +1,120 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.fontSize": 14,
+    "editor.lineHeight": 22,
+    "editor.fontFamily": "'JetBrains Mono', 'Fira Code', Menlo, monospace",
+    "editor.fontLigatures": true,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.minimap.enabled": false,
+    "editor.smoothScrolling": true,
+    "editor.cursorBlinking": "smooth",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "workbench.colorTheme": "One Dark Pro",
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.tree.indent": 16,
+    "terminal.integrated.fontSize": 13,
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "files.autoSave": "onFocusChange",
+    "files.exclude": {
+      "**/.git": true,
+      "**/node_modules": true,
+      "**/.expo": true
+    },
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "emmet.includeLanguages": {
+      "typescript": "typescriptreact"
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "ms-vscode.vscode-typescript-next",
+      "zhuangtongfa.material-theme",
+      "pkief.material-icon-theme",
+      "msjsdiag.vscode-react-native",
+      "expo.vscode-expo-tools",
+      "bradlc.vscode-tailwindcss",
+      "streetsidesoftware.code-spell-checker",
+      "usernamehw.errorlens",
+      "christian-kohler.path-intellisense",
+      "formulahendry.auto-rename-tag",
+      "wix.vscode-import-cost"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug on iOS",
+        "request": "launch",
+        "type": "reactnative",
+        "platform": "ios"
+      },
+      {
+        "name": "Debug on Android",
+        "request": "launch",
+        "type": "reactnative",
+        "platform": "android"
+      },
+      {
+        "name": "Attach to packager",
+        "request": "attach",
+        "type": "reactnative"
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Start Expo",
+        "type": "shell",
+        "command": "npx expo start",
+        "group": { "kind": "build", "isDefault": true },
+        "presentation": { "reveal": "always", "panel": "new" },
+        "problemMatcher": []
+      },
+      {
+        "label": "Start Expo (clear cache)",
+        "type": "shell",
+        "command": "npx expo start --clear",
+        "group": "build",
+        "presentation": { "reveal": "always", "panel": "new" },
+        "problemMatcher": []
+      },
+      {
+        "label": "Build iOS",
+        "type": "shell",
+        "command": "eas build --platform ios",
+        "group": "build",
+        "presentation": { "reveal": "always", "panel": "new" },
+        "problemMatcher": []
+      },
+      {
+        "label": "Build Android",
+        "type": "shell",
+        "command": "eas build --platform android",
+        "group": "build",
+        "presentation": { "reveal": "always", "panel": "new" },
+        "problemMatcher": []
+      }
+    ]
+  }
+}
