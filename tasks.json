@@ -1,0 +1,69 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "▶ Start Expo (iPhone preview)",
+      "type": "shell",
+      "command": "npx expo start",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "new", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "▶ Start Expo (clear cache)",
+      "type": "shell",
+      "command": "npx expo start --clear",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 Install dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "🍎 Build for App Store (iOS)",
+      "type": "shell",
+      "command": "eas build --platform ios --profile production",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" },
+      "problemMatcher": []
+    },
+    {
+      "label": "🤖 Build for Play Store (Android)",
+      "type": "shell",
+      "command": "eas build --platform android --profile production",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 Submit to App Store",
+      "type": "shell",
+      "command": "eas submit --platform ios",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 Submit to Play Store",
+      "type": "shell",
+      "command": "eas submit --platform android",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Deploy to Vercel",
+      "type": "shell",
+      "command": "cd vercel && vercel deploy --prod",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" },
+      "problemMatcher": []
+    }
+  ]
+}

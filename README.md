@@ -1,160 +1,71 @@
-# WAAW Investor — Mobile App
+# WAAW Web — Vercel Deployment
 
-React Native / Expo app for the WAAW diaspora investment platform.
-Built for iOS (App Store) and Android (Google Play).
-
----
-
-## Screens
-
-| Screen | Description |
-|--------|-------------|
-| Home | Portfolio snapshot, hero total, stat tiles, commitments list |
-| Startups | Verified deals with raise progress, sector tags, location |
-| Startup Detail | Full deal view — pitch, stats, founder bio, commit CTA |
-| Commit Flow | Preset + custom amount, review step, escrow confirmation |
-| Portfolio | Holdings list, escrow status, empty state with explainer |
-| Inbox | Founder conversations, unread badge, safety notice |
-| Profile | KYC status, account rows, escrow total |
+This folder contains the Next.js web app and API routes deployed to Vercel.
+The mobile app (Expo) and web app (Next.js) share the same Supabase backend.
 
 ---
 
-## Design tokens
+## What runs on Vercel
 
-| Token | Value | Use |
-|-------|-------|-----|
-| `bg` | `#211f1c` | App background |
-| `text` | `#f4f2ee` | Primary text |
-| `muted` | `#a29e97` | Secondary text |
-| `line` | `#454239` | Borders / dividers |
-| `accent` | `#e0a83d` | Gold — CTAs, active tab, highlights |
-| `card` | `#282521` | Card surfaces |
-| `deeper` | `#1a1815` | Inset / avatar backgrounds |
+1. **Public founder profiles** — waaw.co/p/[slug]
+   - Shareable pages visible without an account
+   - Shows startup details, raise progress, co-founders
+   - CTA to sign up as investor
 
-Fonts: Newsreader (serif display), IBM Plex Mono (labels/data), Inter (body).
+2. **API routes**
+   - /api/webhooks/stripe — handles $100 founder onboarding payment
+   - /api/webhooks/flutterwave — handles escrow status updates
+   - /api/loca8tor/verify — proxies postcode verification to Loca8tor API
+   - /api/notifications/send — sends push notifications via Expo
+
+3. **Web investor portal** — waaw.co/dashboard
+   - Same auth as mobile via Supabase
+   - Full deal flow accessible on desktop
 
 ---
 
-## Setup
+## Deploy to Vercel
 
 ```bash
-# 1. Install dependencies
+# Install Vercel CLI
+npm install -g vercel
+
+# From the vercel/ folder
+cd vercel
 npm install
-
-# 2. Start Expo dev server
-npm start
-
-# 3. Run on device / simulator
-npm run ios      # iOS simulator
-npm run android  # Android emulator
+vercel deploy --prod
 ```
 
-Scan the QR code with Expo Go on your phone to preview immediately.
+## Environment variables to set in Vercel dashboard
+
+Go to: vercel.com → your project → Settings → Environment Variables
+
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key (for server-side operations)
+STRIPE_SECRET_KEY=sk_live_your-key
+STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+FLUTTERWAVE_SECRET_KEY=FLWSECK_your-key
+LOCA8TOR_API_KEY=your-loca8tor-key
+EXPO_ACCESS_TOKEN=your-expo-access-token
 
 ---
 
-## Build for stores
+## Linking custom domain
 
-### Prerequisites
-- Install EAS CLI: `npm install -g eas-cli`
-- Log in: `eas login`
-- Configure: replace placeholders in `eas.json` with your Apple ID, team ID, and Google Play service account
-
-### iOS (App Store)
-```bash
-# Build production IPA
-npm run build:ios
-
-# Submit to App Store Connect
-npm run submit:ios
-```
-
-You need:
-- Apple Developer account ($99/year)
-- App record created in App Store Connect
-- Distribution certificate and provisioning profile (EAS handles this)
-
-### Android (Google Play)
-```bash
-# Build production AAB
-npm run build:android
-
-# Submit to Play Store
-npm run submit:android
-```
-
-You need:
-- Google Play Developer account ($25 one-time)
-- App created in Play Console
-- Google Play service account JSON key (download from Play Console → Setup → API access)
+1. Go to vercel.com → your project → Settings → Domains
+2. Add waaw.co
+3. Update your DNS at your domain registrar:
+   - A record: 76.76.21.21
+   - CNAME www: cname.vercel-dns.com
+4. Vercel auto-provisions SSL
 
 ---
 
-## Project structure
+## Key file: /vercel/pages/p/[slug].tsx
 
-```
-waaw-app/
-├── App.tsx                    # Root — state, navigation, screen routing
-├── app.json                   # Expo config (bundle IDs, permissions)
-├── eas.json                   # EAS build + submit config
-├── src/
-│   ├── theme/index.ts         # Colors, fonts, spacing, radius
-│   ├── data/index.ts          # Types, mock data
-│   ├── components/index.tsx   # Shared UI components
-│   ├── navigation/TabBar.tsx  # Bottom tab bar
-│   └── screens/
-│       ├── HomeScreen.tsx
-│       ├── StartupsScreen.tsx
-│       ├── StartupDetailScreen.tsx
-│       ├── CommitScreen.tsx
-│       ├── PortfolioScreen.tsx
-│       ├── MessagesScreen.tsx
-│       └── ProfileScreen.tsx
-```
-
----
-
-## Connecting to your backend
-
-Replace mock data in `src/data/index.ts` with API calls to your WAAW backend.
-Commitments and KYC state should be fetched from the same data source as the web app.
-
-Key integration points:
-- `MOCK_STARTUPS` → fetch from `/api/startups?status=verified`
-- `Commitment[]` in `App.tsx` → fetch from `/api/commitments?userId=...`
-- KYC state → fetch from `/api/kyc?userId=...`
-- Loca8tor postcode API → call during KYC verification screen
-
----
-
-## Store listing copy (ready to paste)
-
-**App name:** WAAW Investor
-
-**Short description (80 chars):**
-Connect with verified African startups. Invest via protected escrow.
-
-**Full description:**
-WAAW (We Are All We've Got) connects African diaspora investors with
-verified, early-stage African startups raising capital now.
-
-Browse deals across AgriTech, FinTech, HealthTech, EdTech, and more.
-Commit to invest through a fully protected escrow flow. Track your
-portfolio, monitor escrow status in real time, and communicate directly
-with founders.
-
-Every startup on WAAW is verified before appearing in the deal flow.
-Your capital is protected from commitment through to release.
-
-Features:
-- Browse verified African startups raising now
-- Commit to invest via protected escrow
-- Track portfolio and escrow status in real time
-- Message founders directly
-- Identity verification built in
-
-**Keywords:** diaspora, africa, investment, startup, escrow, fintech, agritech
-
-**Category:** Finance
-
-**Age rating:** 17+ (financial content)
+This is the public founder profile page.
+It fetches startup data from Supabase server-side (SSR) so:
+- Google can index it (SEO)
+- Open Graph tags work for WhatsApp/LinkedIn previews
+- No login required to view

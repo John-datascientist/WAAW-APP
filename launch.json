@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug on iOS Simulator",
+      "request": "launch",
+      "type": "reactnative",
+      "platform": "ios"
+    },
+    {
+      "name": "Debug on Android Emulator",
+      "request": "launch",
+      "type": "reactnative",
+      "platform": "android"
+    },
+    {
+      "name": "Attach to Expo packager",
+      "request": "attach",
+      "type": "reactnative"
+    }
+  ]
+}

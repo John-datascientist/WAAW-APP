@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+    "zhuangtongfa.material-theme",
+    "pkief.material-icon-theme",
+    "msjsdiag.vscode-react-native",
+    "expo.vscode-expo-tools",
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "wix.vscode-import-cost"
+  ]
+}
