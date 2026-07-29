@@ -5,7 +5,7 @@ import { GoldButton, TextField } from '../../components';
 
 interface Props {
   onBack: () => void;
-  onSubmit: (email: string, password: string) => string | null;
+  onSubmit: (email: string, password: string) => Promise<string | null>;
   onForgotPassword: () => void;
   onSignUp: () => void;
 }
@@ -14,9 +14,12 @@ export default function SignInScreen({ onBack, onSubmit, onForgotPassword, onSig
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    const result = onSubmit(email.trim(), password);
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    const result = await onSubmit(email.trim(), password);
+    setSubmitting(false);
     setError(result);
   };
 
@@ -39,7 +42,7 @@ export default function SignInScreen({ onBack, onSubmit, onForgotPassword, onSig
           <Text style={styles.forgotLink}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <GoldButton label="Sign in" onPress={handleSubmit} style={{ marginTop: spacing.lg }} />
+        <GoldButton label={submitting ? 'Signing in…' : 'Sign in'} onPress={submitting ? () => {} : handleSubmit} style={{ marginTop: spacing.lg, opacity: submitting ? 0.6 : 1 }} />
 
         <TouchableOpacity style={styles.signUpLink} onPress={onSignUp} activeOpacity={0.7}>
           <Text style={styles.signUpText}>Don't have an account? <Text style={styles.signUpAccent}>Sign up</Text></Text>

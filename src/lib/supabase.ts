@@ -19,7 +19,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 export type Database = {
   public: {
     Tables: {
-      profiles: {
+      waaw_profiles: {
         Row: {
           id: string;
           email: string;
@@ -32,10 +32,10 @@ export type Database = {
           referral_code: string | null;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
+        Insert: Omit<Database['public']['Tables']['waaw_profiles']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['waaw_profiles']['Insert']>;
       };
-      startups: {
+      waaw_startups: {
         Row: {
           id: string;
           name: string;
@@ -57,10 +57,10 @@ export type Database = {
           tags: string[];
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['startups']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['startups']['Insert']>;
+        Insert: Omit<Database['public']['Tables']['waaw_startups']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['waaw_startups']['Insert']>;
       };
-      cofounders: {
+      waaw_cofounders: {
         Row: {
           id: string;
           startup_id: string;
@@ -70,10 +70,10 @@ export type Database = {
           on_registration_docs: boolean;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['cofounders']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['cofounders']['Insert']>;
+        Insert: Omit<Database['public']['Tables']['waaw_cofounders']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['waaw_cofounders']['Insert']>;
       };
-      commitments: {
+      waaw_commitments: {
         Row: {
           id: string;
           investor_id: string;
@@ -86,20 +86,20 @@ export type Database = {
           net_to_founder: number;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['commitments']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['commitments']['Insert']>;
+        Insert: Omit<Database['public']['Tables']['waaw_commitments']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['waaw_commitments']['Insert']>;
       };
-      watchlist: {
+      waaw_watchlist: {
         Row: {
           id: string;
           investor_id: string;
           startup_id: string;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['watchlist']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['watchlist']['Insert']>;
+        Insert: Omit<Database['public']['Tables']['waaw_watchlist']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['waaw_watchlist']['Insert']>;
       };
-      notifications: {
+      waaw_notifications: {
         Row: {
           id: string;
           user_id: string;
@@ -109,10 +109,10 @@ export type Database = {
           type: 'commitment' | 'escrow' | 'kyc' | 'general';
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['notifications']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['notifications']['Insert']>;
+        Insert: Omit<Database['public']['Tables']['waaw_notifications']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['waaw_notifications']['Insert']>;
       };
-      syndicate_members: {
+      waaw_syndicate_members: {
         Row: {
           id: string;
           startup_id: string;
@@ -121,8 +121,8 @@ export type Database = {
           confirmed: boolean;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['syndicate_members']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['syndicate_members']['Insert']>;
+        Insert: Omit<Database['public']['Tables']['waaw_syndicate_members']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['waaw_syndicate_members']['Insert']>;
       };
     };
   };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, StatusBar, Alert } from 'react-native';
 import {
   useFonts,
@@ -19,6 +19,9 @@ import {
 } from '@expo-google-fonts/inter';
 
 import { colors } from './src/theme';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { useStartups, useWatchlist as useRealWatchlist, useNotifications as useRealNotifications } from './src/hooks/useWAAW';
+import { supabase } from './src/lib/supabase';
 import TabBar, { Tab } from './src/navigation/TabBar';
 import AgeGateScreen from './src/screens/AgeGateScreen';
 import CookieConsentScreen from './src/screens/CookieConsentScreen';
@@ -73,10 +76,8 @@ import {
   emptyFounderOnboarding,
   isFounderOnboardingComplete,
   founderOnboardingToStartup,
-  genReferralCode,
   nextInterviewSlot,
   LEGAL_DOCS,
-  MOCK_STARTUPS,
 } from './src/data';
 
 type Onboarding = 'age' | 'cookies' | 'done';
@@ -121,9 +122,52 @@ type AppScreen =
   | { type: 'compare' }
   | { type: 'legal-doc'; doc: string };
 
-const genCode = () => String(Math.floor(100000 + Math.random() * 900000));
-
 export default function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
+  );
+}
+
+// ─── Mappers: real Supabase rows → the app's existing local-first shapes ────
+// Keeping every screen's props/interfaces untouched (they all already expect
+// Startup/Notice from src/data), so only App.tsx's data source changes.
+const mapStartupRow = (r: any): Startup => ({
+  id: r.id,
+  name: r.name,
+  sector: r.sector,
+  stage: r.stage,
+  country: r.country,
+  city: r.city,
+  pitch: r.pitch,
+  raisingAmount: Number(r.raising_amount),
+  raisedAmount: Number(r.raised_amount),
+  equity: r.equity_pct != null ? `${r.equity_pct}%` : 'TBD',
+  postMoney: r.post_money_valuation != null ? '$' + Number(r.post_money_valuation).toLocaleString() : 'TBD',
+  verified: r.verified,
+  founderName: r.founder_name ?? '',
+  founderBio: r.founder_bio ?? '',
+  tags: r.tags ?? [],
+  boosted: r.boost_active,
+  team: (r.waaw_cofounders ?? []).map((c: any) => ({ name: c.name, role: c.role, socialLink: '' })),
+  socialLinks: [],
+});
+
+const mapNotificationRow = (r: any): Notice => ({
+  id: r.id,
+  title: r.title,
+  body: r.body,
+  timestamp: new Date(r.created_at).toLocaleString(),
+  read: r.read,
+});
+
+// The founder's own onboarding draft (before it's a real registered startup
+// row) uses a synthetic non-UUID id — real watchlist rows have a foreign key
+// to real startup UUIDs, so saving that draft can't be persisted server-side.
+const isRealStartupId = (id: string) => !id.startsWith('founder-');
+
+function AppInner() {
   const [fontsLoaded] = useFonts({
     Newsreader_500Medium,
     Newsreader_500Medium_Italic,
@@ -137,6 +181,20 @@ export default function App() {
     Inter_600SemiBold,
   });
 
+  const { user: supabaseUser, profile, signUp, verifySignup, resendSignupCode, signIn, signOut } = useAuth();
+  const { startups: startupRows } = useStartups();
+  const { watchlist: realWatchlist, toggle: toggleRealWatchlist } = useRealWatchlist();
+  const { notifications: notificationRows, unread: unreadFromHook, markAllRead: markAllNoticesRead, toggleRead: toggleNoticeRead } = useRealNotifications();
+
+  const user: AuthUser | null = profile
+    ? {
+        name: profile.full_name ?? '',
+        email: profile.email,
+        role: profile.role,
+        referralCode: profile.referral_code ?? '',
+      }
+    : null;
+
   const [onboarding, setOnboarding] = useState<Onboarding>('age');
   const [preLoginLegalDoc, setPreLoginLegalDoc] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('home');
@@ -146,19 +204,20 @@ export default function App() {
   const [kyc, setKyc] = useState<KYC | null>(null);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
 
-  // ─── Mock auth state (no backend configured yet — see SETUP.md) ───────────
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [registeredUsers, setRegisteredUsers] = useState<AuthUser[]>([]);
+  // ─── Sign-up flow transitional state (email/role held between the sign-up
+  // form and the verify-code screen — the account itself is real, via Supabase) ──
   const [pendingSignup, setPendingSignup] = useState<SignUpData | null>(null);
-  const [pendingCode, setPendingCode] = useState('');
   const [pendingStartup, setPendingStartup] = useState<Startup | null>(null);
 
-  // ─── Founder onboarding + boost state (mock/local, same reasoning as auth) ──
+  // ─── Founder onboarding + boost state (mock/local — the onboarding wizard
+  // doesn't yet collect every field the real startups table requires, e.g.
+  // equity_pct/post_money_valuation, so this stays a local draft until a
+  // future pass extends the wizard and registers it for real) ──────────────
   const [founderOnboarding, setFounderOnboarding] = useState<FounderOnboarding | null>(null);
   const [boostPlan, setBoostPlan] = useState<BoostPlan | null>(null);
   const [boostUntil, setBoostUntil] = useState<string | null>(null);
   const [boostUntilTs, setBoostUntilTs] = useState<number | null>(null);
-  const [watchlist, setWatchlist] = useState<string[]>([]);
+  const [localWatchlist, setLocalWatchlist] = useState<string[]>([]);
   const [profileViewCount, setProfileViewCount] = useState(0);
   const [investorViewCount, setInvestorViewCount] = useState(0);
   const [linkCopyCount, setLinkCopyCount] = useState(0);
@@ -166,10 +225,23 @@ export default function App() {
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [startupNotes, setStartupNotes] = useState<Record<string, string>>({});
-  const [referralCounts, setReferralCounts] = useState<Record<string, number>>({});
+  const [referralCount, setReferralCount] = useState(0);
+
+  useEffect(() => {
+    if (!user?.referralCode) return;
+    supabase
+      .from('waaw_profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_by', user.referralCode)
+      .then(({ count }) => setReferralCount(count ?? 0));
+  }, [user?.referralCode]);
+
+  // Real (DB-backed) watchlist for real startups, plus a local-only fallback
+  // for the founder's own not-yet-registered draft (see isRealStartupId above).
+  const watchlist = [...realWatchlist, ...localWatchlist];
 
   // ─── Notifications, notification prefs, referrals ──────────────────────────
-  const [notices, setNotices] = useState<Notice[]>([]);
+  const notices = notificationRows.map(mapNotificationRow);
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>({
     commitments: true,
     deals: true,
@@ -210,7 +282,8 @@ export default function App() {
     raisedAmount: s.raisedAmount + (committedByStartup[s.id] ?? 0),
   });
 
-  const baseStartups = founderStartupRaw ? [...MOCK_STARTUPS, founderStartupRaw] : MOCK_STARTUPS;
+  const dbStartups = startupRows.map(mapStartupRow);
+  const baseStartups = founderStartupRaw ? [...dbStartups, founderStartupRaw] : dbStartups;
   const allStartups = baseStartups.map(withLiveRaise);
   const featuredStartups = allStartups.filter((s) => s.boosted);
 
@@ -229,13 +302,16 @@ export default function App() {
     ? commitments.filter((c) => c.startupId === previewStartup.id && c.status !== 'Refunded').length
     : 0;
 
-  const unreadNoticeCount = notices.filter((n) => !n.read).length;
+  const unreadNoticeCount = unreadFromHook;
   const recentlyViewed = recentlyViewedIds
     .map((id) => allStartups.find((s) => s.id === id))
     .filter((s): s is Startup => !!s);
 
+  // Inserts a real notification row for the signed-in user; the realtime
+  // subscription in useNotifications picks it up and appends it automatically.
   const pushNotice = (title: string, body: string) => {
-    setNotices((prev) => [{ id: String(Date.now()), title, body, timestamp: 'Just now', read: false }, ...prev]);
+    if (!supabaseUser) return;
+    supabase.from('waaw_notifications').insert({ user_id: supabaseUser.id, title, body, type: 'general' });
   };
 
   const pushFounderActivity = (label: string) => {
@@ -356,15 +432,17 @@ export default function App() {
     }
   };
 
-  // ─── Auth handlers ──────────────────────────────────────────────────────────
-  const handleSignUpSubmit = (data: SignUpData) => {
+  // ─── Auth handlers (real Supabase auth) ─────────────────────────────────────
+  const handleSignUpSubmit = async (data: SignUpData): Promise<string | null> => {
+    const { error } = await signUp(data.email, data.password, data.role, data.name, data.country, data.referralCode);
+    if (error) return error;
     setPendingSignup(data);
-    setPendingCode(genCode());
     setScreen({ type: 'verify' });
+    return null;
   };
 
-  const finishAuth = (signedUpUser: AuthUser) => {
-    if (signedUpUser.role === 'investor') {
+  const finishAuth = (signedUpRole: 'investor' | 'founder', signedUpName: string) => {
+    if (signedUpRole === 'investor') {
       if (!riskAccepted) {
         setScreen({ type: 'risk-gate', startup: pendingStartup ?? undefined });
       } else if (pendingStartup) {
@@ -373,42 +451,32 @@ export default function App() {
         goTabs('profile');
       }
     } else {
-      setFounderOnboarding(emptyFounderOnboarding(signedUpUser.name));
-      setScreen({ type: 'founder-welcome', name: signedUpUser.name });
+      setFounderOnboarding(emptyFounderOnboarding(signedUpName));
+      setScreen({ type: 'founder-welcome', name: signedUpName });
     }
     setPendingStartup(null);
   };
 
-  const handleVerify = (code: string) => {
-    if (code !== pendingCode || !pendingSignup) return false;
-    const newUser: AuthUser = {
-      name: pendingSignup.name,
-      email: pendingSignup.email,
-      role: pendingSignup.role,
-      referralCode: genReferralCode(pendingSignup.name),
-    };
-    setRegisteredUsers((prev) => [...prev, newUser]);
-    if (pendingSignup.referralCode) {
-      const referrer = registeredUsers.find((u) => u.referralCode === pendingSignup.referralCode);
-      if (referrer) {
-        setReferralCounts((prev) => ({ ...prev, [referrer.referralCode]: (prev[referrer.referralCode] ?? 0) + 1 }));
-      }
-    }
-    setUser(newUser);
+  const handleVerify = async (code: string): Promise<string | null> => {
+    if (!pendingSignup) return 'Something went wrong — please sign up again.';
+    const { error } = await verifySignup(pendingSignup.email, code);
+    if (error) return error;
+    const { role, name } = pendingSignup;
     setPendingSignup(null);
-    finishAuth(newUser);
-    return true;
+    finishAuth(role, name);
+    return null;
   };
 
   const handleResendCode = () => {
-    setPendingCode(genCode());
+    if (pendingSignup) resendSignupCode(pendingSignup.email);
   };
 
-  const handleSignInSubmit = (email: string, _password: string) => {
-    const found = registeredUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (!found) return 'No account found for that email. Sign up instead.';
-    setUser(found);
-    if (found.role === 'investor' && pendingStartup) {
+  const handleSignInSubmit = async (email: string, password: string): Promise<string | null> => {
+    const { error } = await signIn(email, password);
+    if (error) return error;
+    const { data: profileRow } = await supabase.from('waaw_profiles').select('role').eq('email', email).single();
+    const role = profileRow?.role;
+    if (role === 'investor' && pendingStartup) {
       if (!riskAccepted) {
         setScreen({ type: 'risk-gate', startup: pendingStartup });
       } else {
@@ -423,13 +491,16 @@ export default function App() {
   };
 
   const handleSignOut = () => {
-    setUser(null);
+    signOut();
     goTabs('home');
   };
 
   const handleCloseAccount = () => {
-    if (user) setRegisteredUsers((prev) => prev.filter((u) => u.email !== user.email));
-    setUser(null);
+    // Deleting the underlying auth account requires a service-role key, which
+    // the client never holds — so this signs the account out for real and
+    // directs deletion through support rather than silently no-op'ing.
+    pushNotice('Account closure requested', 'Sign out complete. Contact support to finish deleting your account and data.');
+    signOut();
     setKyc(null);
     goTabs('home');
   };
@@ -531,9 +602,15 @@ export default function App() {
   };
 
   const handleToggleWatchlist = (startupId: string) => {
-    setWatchlist((prev) =>
-      prev.includes(startupId) ? prev.filter((id) => id !== startupId) : [...prev, startupId]
-    );
+    if (isRealStartupId(startupId)) {
+      toggleRealWatchlist(startupId);
+    } else {
+      // The founder's own not-yet-registered draft has no real row to save
+      // against — fall back to a local-only toggle for that one edge case.
+      setLocalWatchlist((prev) =>
+        prev.includes(startupId) ? prev.filter((id) => id !== startupId) : [...prev, startupId]
+      );
+    }
   };
 
   // Comparing more than 2 deals at once stops being a "compare" screen, so a
@@ -679,7 +756,6 @@ export default function App() {
         <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
         <VerifyScreen
           email={pendingSignup?.email ?? ''}
-          demoCode={pendingCode}
           onVerify={handleVerify}
           onResend={handleResendCode}
           onBack={() => setScreen({ type: 'role-select' })}
@@ -938,7 +1014,7 @@ export default function App() {
         <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
         <ReferralScreen
           referralCode={user.referralCode}
-          referralCount={referralCounts[user.referralCode] ?? 0}
+          referralCount={referralCount}
           onBack={() => goTabs('profile')}
         />
       </View>
@@ -1110,9 +1186,9 @@ export default function App() {
         <NotificationsScreen
           notices={notices}
           onBack={() => goTabs('home')}
-          onMarkAllRead={() => setNotices((prev) => prev.map((n) => ({ ...n, read: true })))}
+          onMarkAllRead={markAllNoticesRead}
           onOpenSettings={() => setScreen({ type: 'notification-settings' })}
-          onToggleRead={(id) => setNotices((prev) => prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)))}
+          onToggleRead={toggleNoticeRead}
         />
       </View>
     );

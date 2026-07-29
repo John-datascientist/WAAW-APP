@@ -5,19 +5,21 @@ import { GoldButton, GhostButton, TextField } from '../../components';
 
 interface Props {
   email: string;
-  demoCode: string;
-  onVerify: (code: string) => boolean;
+  onVerify: (code: string) => Promise<string | null>;
   onResend: () => void;
   onBack: () => void;
 }
 
-export default function VerifyScreen({ email, demoCode, onVerify, onResend, onBack }: Props) {
+export default function VerifyScreen({ email, onVerify, onResend, onBack }: Props) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    const ok = onVerify(code.trim());
-    setError(ok ? undefined : 'That code is incorrect. Try again.');
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    const err = await onVerify(code.trim());
+    setSubmitting(false);
+    setError(err ?? undefined);
   };
 
   return (
@@ -33,10 +35,6 @@ export default function VerifyScreen({ email, demoCode, onVerify, onResend, onBa
         <Text style={styles.title}>Verify your email</Text>
         <Text style={styles.sub}>Enter the 6-digit code we sent to {email}.</Text>
 
-        <View style={styles.demoBox}>
-          <Text style={styles.demoText}>DEMO MODE — no email is actually sent yet. Your code: {demoCode}</Text>
-        </View>
-
         <TextField
           label="Verification code"
           value={code}
@@ -46,7 +44,7 @@ export default function VerifyScreen({ email, demoCode, onVerify, onResend, onBa
           error={error}
         />
 
-        <GoldButton label="Verify" onPress={handleSubmit} style={{ marginTop: spacing.sm }} />
+        <GoldButton label={submitting ? 'Verifying…' : 'Verify'} onPress={submitting ? () => {} : handleSubmit} style={{ marginTop: spacing.sm, opacity: submitting ? 0.6 : 1 }} />
         <GhostButton label="Resend code" onPress={onResend} style={{ marginTop: spacing.sm }} />
       </ScrollView>
     </SafeAreaView>
@@ -68,12 +66,4 @@ const styles = StyleSheet.create({
   icon: { fontSize: 36, marginBottom: 14 },
   title: { fontFamily: fonts.serif, fontSize: 26, color: colors.text, marginBottom: 6 },
   sub: { fontFamily: fonts.sans, fontSize: 13, color: colors.muted, marginBottom: 20, lineHeight: 19, fontWeight: '300' as any },
-  demoBox: {
-    borderLeftWidth: 2,
-    borderLeftColor: colors.accent,
-    paddingLeft: 14,
-    paddingVertical: 8,
-    marginBottom: spacing.lg,
-  },
-  demoText: { fontFamily: fonts.mono, fontSize: 10, color: colors.muted, letterSpacing: 0.4, lineHeight: 16 },
 });

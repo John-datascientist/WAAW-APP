@@ -16,7 +16,7 @@ interface Props {
   role: 'investor' | 'founder';
   onBack: () => void;
   onSignIn: () => void;
-  onSubmit: (data: SignUpData) => void;
+  onSubmit: (data: SignUpData) => Promise<string | null>;
 }
 
 const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -51,9 +51,10 @@ export default function SignUpScreen({ role, onBack, onSignIn, onSubmit }: Props
   const [country, setCountry] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
   const strength = passwordStrength(password);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = 'Enter your full name.';
     if (!isValidEmail(email)) next.email = 'Enter a valid email address.';
@@ -61,7 +62,8 @@ export default function SignUpScreen({ role, onBack, onSignIn, onSubmit }: Props
     if (!country.trim()) next.country = 'Enter your country.';
     setErrors(next);
     if (Object.keys(next).length === 0) {
-      onSubmit({
+      setSubmitting(true);
+      const err = await onSubmit({
         name: name.trim(),
         email: email.trim(),
         password,
@@ -69,6 +71,8 @@ export default function SignUpScreen({ role, onBack, onSignIn, onSubmit }: Props
         role,
         referralCode: referralCode.trim() || undefined,
       });
+      setSubmitting(false);
+      if (err) setErrors({ email: err });
     }
   };
 
@@ -110,7 +114,7 @@ export default function SignUpScreen({ role, onBack, onSignIn, onSubmit }: Props
           autoCapitalize="characters"
         />
 
-        <GoldButton label="Create account" onPress={handleSubmit} style={{ marginTop: spacing.sm }} />
+        <GoldButton label={submitting ? 'Creating account…' : 'Create account'} onPress={submitting ? () => {} : handleSubmit} style={{ marginTop: spacing.sm, opacity: submitting ? 0.6 : 1 }} />
 
         <TouchableOpacity style={styles.signInLink} onPress={onSignIn} activeOpacity={0.7}>
           <Text style={styles.signInText}>Already have an account? <Text style={styles.signInAccent}>Sign in</Text></Text>
