@@ -29,6 +29,7 @@ Built for iOS (App Store) and Android (Google Play).
 | `line` | `#454239` | Borders / dividers |
 | `accent` | `#e0a83d` | Gold — CTAs, active tab, highlights |
 | `card` | `#282521` | Card surfaces |
+
 | `deeper` | `#1a1815` | Inset / avatar backgrounds |
 
 Fonts: Newsreader (serif display), IBM Plex Mono (labels/data), Inter (body).
