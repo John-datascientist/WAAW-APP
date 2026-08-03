@@ -30,7 +30,7 @@ export default function RoleSelectScreen({ onBack, onSelectInvestor, onSelectFou
         <TouchableOpacity style={styles.card} onPress={onSelectInvestor} activeOpacity={0.85}>
           <Text style={styles.cardIcon}>💰</Text>
           <Text style={styles.cardTitle}>Sign up as an investor</Text>
-          <Text style={styles.cardBody}>Browse verified African startups and commit capital via protected escrow.</Text>
+          <Text style={styles.cardBody}>Browse verified Black-founded startups and commit capital via protected escrow.</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.card} onPress={onSelectFounder} activeOpacity={0.85}>

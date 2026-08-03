@@ -13,7 +13,7 @@ const RISKS = [
   { icon: '💸', title: 'Capital at risk.', body: 'The value of your investment can go down as well as up. You may lose some or all of the money you invest.' },
   { icon: '🔒', title: 'Investments are illiquid.', body: 'You may not be able to sell your investment or get your money back quickly. These are long-term commitments.' },
   { icon: '📉', title: 'Early-stage risk.', body: 'Investing in early-stage startups is high risk. Most startups fail. Only invest what you can afford to lose.' },
-  { icon: '🌍', title: 'Cross-border risk.', body: 'Investments in African startups carry additional regulatory, currency, and political risks. Returns may be affected by exchange rate movements.' },
+  { icon: '🌍', title: 'Cross-border risk.', body: 'Investments in Black-founded startups operating in Africa carry additional regulatory, currency, and political risks. Returns may be affected by exchange rate movements.' },
 ];
 
 export default function RiskWarningScreen({ onAccept }: Props) {

@@ -29,7 +29,6 @@ Built for iOS (App Store) and Android (Google Play).
 | `line` | `#454239` | Borders / dividers |
 | `accent` | `#e0a83d` | Gold — CTAs, active tab, highlights |
 | `card` | `#282521` | Card surfaces |
-
 | `deeper` | `#1a1815` | Inset / avatar backgrounds |
 
 Fonts: Newsreader (serif display), IBM Plex Mono (labels/data), Inter (body).
@@ -133,11 +132,11 @@ Key integration points:
 **App name:** WAAW Investor
 
 **Short description (80 chars):**
-Connect with verified African startups. Invest via protected escrow.
+Connect with verified Black-founded startups. Invest via protected escrow.
 
 **Full description:**
-WAAW (We Are All We've Got) connects African diaspora investors with
-verified, early-stage African startups raising capital now.
+WAAW (We Are All We've Got) connects Black diaspora investors with
+verified, early-stage Black-founded startups raising capital now.
 
 Browse deals across AgriTech, FinTech, HealthTech, EdTech, and more.
 Commit to invest through a fully protected escrow flow. Track your
@@ -148,13 +147,13 @@ Every startup on WAAW is verified before appearing in the deal flow.
 Your capital is protected from commitment through to release.
 
 Features:
-- Browse verified African startups raising now
+- Browse verified Black-founded startups raising now
 - Commit to invest via protected escrow
 - Track portfolio and escrow status in real time
 - Message founders directly
 - Identity verification built in
 
-**Keywords:** diaspora, africa, investment, startup, escrow, fintech, agritech
+**Keywords:** diaspora, Black founders, investment, startup, escrow, fintech, agritech
 
 **Category:** Finance
 

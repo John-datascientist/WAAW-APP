@@ -138,9 +138,9 @@ Before submitting to Apple:
 - [ ] App icon: 1024x1024px PNG, no transparency, no rounded corners
 - [ ] Screenshots: 6.7 inch (iPhone 14 Pro Max) and 6.1 inch (iPhone 14)
 - [ ] App name: WAAW Investor
-- [ ] Subtitle (30 chars): Invest in African startups
+- [ ] Subtitle (30 chars): Invest in Black founders
 - [ ] Description: see vercel/store-listing.txt
-- [ ] Keywords: diaspora, africa, investment, startup, escrow, fintech
+- [ ] Keywords: diaspora, black founders, investment, startup, escrow, fintech
 - [ ] Category: Finance
 - [ ] Age rating: 17+
 - [ ] Privacy policy URL: https://waaw.co/privacy

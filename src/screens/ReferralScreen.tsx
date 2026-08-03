@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function ReferralScreen({ referralCode, referralCount, onBack }: Props) {
-  const shareMessage = `Join me on WAAW and invest in verified African startups. Use my code ${referralCode} when you sign up: https://waaw.co/join?ref=${referralCode}`;
+  const shareMessage = `Join me on WAAW and invest in verified Black-founded startups. Use my code ${referralCode} when you sign up: https://waaw.co/join?ref=${referralCode}`;
 
   const handleShare = async () => {
     try {

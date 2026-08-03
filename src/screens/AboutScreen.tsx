@@ -10,7 +10,7 @@ interface Props {
 const SECTIONS = [
   {
     title: 'What is WAAW?',
-    body: 'WAAW (We Are All We’ve Got) connects African diaspora investors with verified, early-stage African startups raising capital. Every deal is reviewed before it appears on the platform.',
+    body: 'WAAW (We Are All We’ve Got) connects Black diaspora investors with verified, early-stage Black-founded startups raising capital. Every deal is reviewed before it appears on the platform.',
   },
   {
     title: 'How investing works',

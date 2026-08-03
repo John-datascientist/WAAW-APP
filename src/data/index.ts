@@ -53,6 +53,7 @@ export interface Startup {
   boosted?: boolean;
   team?: TeamMember[];
   socialLinks?: SocialLink[];
+  createdAt?: string;
 }
 
 export interface KYC {
@@ -60,12 +61,17 @@ export interface KYC {
   status: 'Verified' | 'Pending' | 'Not started';
 }
 
+// Mirrors the `type` check constraint on waaw_notifications in Supabase —
+// keep in sync with supabase/schema.sql if that constraint ever changes.
+export type NotificationType = 'commitment' | 'escrow' | 'kyc' | 'general' | 'syndicate';
+
 export interface Notice {
   id: string;
   title: string;
   body: string;
   timestamp: string;
   read: boolean;
+  type: NotificationType;
 }
 
 export interface FounderActivityEvent {
@@ -211,7 +217,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
     sections: [
       {
         heading: '1. Who we are',
-        body: 'WAAW is operated by Workerholics Solutions Limited. WAAW connects African diaspora investors with verified African startups seeking capital. WAAW is not a bank, broker-dealer, or investment adviser.',
+        body: 'WAAW is operated by Workerholics Solutions Limited. WAAW connects Black diaspora investors with verified Black-founded startups seeking capital. WAAW is not a bank, broker-dealer, or investment adviser.',
       },
       {
         heading: '2. Eligibility',
@@ -347,6 +353,12 @@ export const BOOST_PLANS: BoostPlan[] = [
   { id: 'month', label: '1 month', price: 70, days: 30 },
   { id: 'quarter', label: '3 months', price: 180, days: 90 },
 ];
+
+export interface BoostPurchase {
+  id: string;
+  plan: BoostPlan;
+  purchasedAt: string;
+}
 
 export const MOCK_STARTUPS: Startup[] = [
   {
